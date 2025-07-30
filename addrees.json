@@ -1,6 +1,4 @@
 {
-  "ip": "14.139.34.18",
-  "network": "14.139.34.0/24",
   "version": "IPv4",
   "city": "Mandi",
   "region": "Himachal Pradesh",
@@ -12,9 +10,6 @@
   "country_tld": ".in",
   "continent_code": "AS",
   "in_eu": false,
-  "postal": "175018",
-  "latitude": 31.71667,
-  "longitude": 76.91667,
   "timezone": "Asia/Kolkata",
   "utc_offset": "+05:30",
   "country_calling_code": "+91",
