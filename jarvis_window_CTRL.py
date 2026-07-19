@@ -152,7 +152,7 @@ async def close(window_title: str) -> str:
                 win32gui.PostMessage(hwnd, win32con.WM_CLOSE, 0, 0)
 
     win32gui.EnumWindows(enumHandler, None)
-    return f"❌ Window बंद हो गई है।: {window_title}"
+    return f"✅ Window बंद हो गई है।: {window_title}"
 
 # Jarvis command logic
 @function_tool
