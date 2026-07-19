@@ -5,120 +5,12 @@ import random
 import threading
 import os
 from PIL import Image, ImageTk
-import io
 
 try:
     import ollama
     OLLAMA_AVAILABLE = True
 except ModuleNotFoundError:
     OLLAMA_AVAILABLE = False
-
-def open_chatbot(self):
-    self.chat_window = tk.Toplevel(self.root)
-    self.chat_window.title("Chatbot")
-    self.chat_window.geometry("500x550")
-    
-    
-    try:
-        bg_image_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "images", "background.jpg")
-        if os.path.exists(bg_image_path):
-            # Load and resize the image
-            bg_image = Image.open(bg_image_path)
-            bg_image = bg_image.resize((500, 550), Image.LANCZOS)
-            self.bg_photo = ImageTk.PhotoImage(bg_image)
-            
-            # Create a canvas with the image
-            self.bg_canvas = tk.Canvas(self.chat_window, width=500, height=550)
-            self.bg_canvas.pack(fill="both", expand=True)
-            self.bg_canvas.create_image(0, 0, image=self.bg_photo, anchor="nw")
-            
-            # Create a frame on top of the canvas for content
-            content_frame = tk.Frame(self.bg_canvas, bg='black')
-            content_frame.configure(bg='black', bd=0, highlightthickness=0)
-            content_frame.place(relx=0.5, rely=0.5, anchor="center", relwidth=0.9, relheight=0.9)
-            
-            chat_label = tk.Label(
-                content_frame, 
-                text=f"Hi {self.user_name}, I am Evelyn!\nAsk me anything.",
-                font=("Arial", 12),
-                bg='black',
-                fg='white'
-            )
-            chat_label.pack(pady=10)
-        else:
-            # Fallback if image doesn't exist
-            chat_label = tk.Label(
-                self.chat_window, 
-                text=f"Hi {self.user_name}, I am Evelyn!\nAsk me anything.",
-                font=("Arial", 12)
-            )
-            chat_label.pack(pady=10)
-            content_frame = self.chat_window
-    except Exception as e:
-        print(f"Error loading background image: {e}")
-        chat_label = tk.Label(
-            self.chat_window, 
-            text=f"Hi {self.user_name}, I am Evelyn!\nAsk me anything.",
-            font=("Arial", 12)
-        )
-        chat_label.pack(pady=10)
-        content_frame = self.chat_window
-
-    # Frame for chat history and scrollbar
-    chat_frame = tk.Frame(content_frame, bg='black')
-    chat_frame.pack(fill="both", expand=True, padx=10, pady=(0,10))
-
-    self.chat_history = tk.Text(
-        chat_frame, 
-        width=60, 
-        height=25, 
-        font=("Arial", 12), 
-        bg="#101010", 
-        fg="white",
-        state="disabled", 
-        wrap="word"
-    )
-    self.chat_history.pack(side="left", fill="both", expand=True)
-
-    scrollbar = tk.Scrollbar(chat_frame, command=self.chat_history.yview)
-    scrollbar.pack(side="right", fill="y")
-    self.chat_history['yscrollcommand'] = scrollbar.set
-
-    # Frame for entry and send button
-    entry_frame = tk.Frame(content_frame, bg='black')
-    entry_frame.pack(fill="x", padx=10, pady=(0,10))
-
-    self.chat_entry = tk.Entry(entry_frame, width=45, bg='#202020', fg='white', insertbackground='white')
-    self.chat_entry.pack(side="left", fill="x", expand=True, padx=(0,5))
-    self.chat_entry.focus_set()
-    self.chat_entry.bind("<Return>", self.send_message)
-
-    send_button = tk.Button(entry_frame, text="Send", command=self.send_message, bg='#303030', fg='white')
-    send_button.pack(side="right")
-
-def send_message(self, event=None):
-    user_input = self.chat_entry.get().strip()
-    if not user_input:
-        messagebox.showwarning("Evelyn", "Please enter a message.")
-        return
-
-    # Display user message
-    self.chat_history.config(state="normal")
-    self.chat_history.insert(tk.END, f"You: {user_input}\n")
-    self.chat_history.config(state="disabled")
-    self.chat_history.see(tk.END)
-
-    self.chat_entry.delete(0, tk.END)
-
-    def fetch_response():
-        response = self.get_chatbot_response(user_input)
-        self.chat_history.config(state="normal")
-        self.chat_history.insert(tk.END, f"Evelyn: {response}\n\n")
-        self.chat_history.config(state="disabled")
-        self.chat_history.see(tk.END)
-
-    threading.Thread(target=fetch_response, daemon=True).start()
-
 
 ROCK = "Rock"
 PAPER = "Paper"
@@ -425,9 +317,6 @@ class OSPrototype:
         except ValueError:
             self.result_label.config(text="Please enter a valid number.")
         self.attempts_label.config(text=f"Attempts: {self.attempts}")
-
-    def open_snake_game(self):
-        messagebox.showinfo("Snake Game", "Snake Game feature coming soon!")
 
     def open_chatbot(self):
         self.chat_window = tk.Toplevel(self.root)
