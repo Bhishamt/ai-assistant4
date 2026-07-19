@@ -551,7 +551,7 @@ class OSPrototype:
     def update_quote(self):
         quotes = [
             "Great things never come from comfort zones.",
-            "The only way to do great work is to love what you do.",₹
+            "The only way to do great work is to love what you do.",
             "Every moment is a fresh beginning.",
             "The purpose of our lives is to be happy.",
             "Dream big, work hard, stay focused."
