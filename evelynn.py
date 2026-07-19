@@ -369,9 +369,9 @@ class OSPrototype:
 
     def get_quote(self, player):
         if player == CHALLENGER:
-            return CHALLENGER_QUOTES[0]
+            return random.choice(CHALLENGER_QUOTES)
         else:
-            return DEFENDER_QUOTES[0]
+            return random.choice(DEFENDER_QUOTES)
 
     def reset_game(self):
         self.game_board = [EMPTY] * 9
