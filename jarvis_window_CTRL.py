@@ -29,26 +29,37 @@ sys.stdout.reconfigure(encoding='utf-8')
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# App command map
+# App command map with extended support for common Windows tools and browsers
 APP_MAPPINGS = {
     "notepad": "notepad",
     "calculator": "calc",
-    "chrome": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-    "vlc": "C:\\Program Files\\VideoLAN\\VLC\\vlc.exe",
+    "chrome": "chrome",
+    "edge": "msedge",
+    "firefox": "firefox",
+    "explorer": "explorer",
+    "file explorer": "explorer",
+    "task manager": "taskmgr",
+    "powershell": "powershell",
+    "cmd": "cmd",
     "command prompt": "cmd",
     "control panel": "control",
     "settings": "start ms-settings:",
     "paint": "mspaint",
-    "vs code": "C:\\Users\\gaura\\AppData\\Local\\Programs\\Microsoft VS Code\\Code.exe",
-    "postman": "C:\\Users\\gaura\\AppData\\Local\\Postman\\Postman.exe"
+    "vlc": "vlc",
+    "word": "winword",
+    "excel": "excel",
+    "spotify": "spotify",
+    "vs code": "code",
+    "vscode": "code"
 }
 
 # -------------------------
 # Global focus utility
 # -------------------------
 async def focus_window(title_keyword: str) -> bool:
+    """Attempt to find and bring a window matching `title_keyword` to front focus."""
     if not gw:
-        logger.warning("⚠ pygetwindow")
+        logger.warning("⚠ pygetwindow not available")
         return False
 
     await asyncio.sleep(1.5)  # Give time for window to appear
@@ -64,8 +75,11 @@ async def focus_window(title_keyword: str) -> bool:
 
 # Index files/folders
 async def index_items(base_dirs):
+    """Index folders and files in given directory paths."""
     item_index = []
     for base_dir in base_dirs:
+        if not os.path.exists(base_dir):
+            continue
         for root, dirs, files in os.walk(base_dir):
             for d in dirs:
                 item_index.append({"name": d, "path": os.path.join(root, d), "type": "folder"})
@@ -75,6 +89,7 @@ async def index_items(base_dirs):
     return item_index
 
 async def search_item(query, index, item_type):
+    """Fuzzy search for a file or folder in the index."""
     filtered = [item for item in index if item["type"] == item_type]
     choices = [item["name"] for item in filtered]
     if not choices:
@@ -93,21 +108,21 @@ async def open_folder(path):
         os.startfile(path) if os.name == 'nt' else subprocess.call(['xdg-open', path])
         await focus_window(os.path.basename(path))
     except Exception as e:
-        logger.error(f"❌ फ़ाइल open करने में error आया। {e}")
+        logger.error(f"❌ Folder open करने में error आया: {e}")
 
 async def play_file(path):
     try:
         os.startfile(path) if os.name == 'nt' else subprocess.call(['xdg-open', path])
         await focus_window(os.path.basename(path))
     except Exception as e:
-        logger.error(f"❌ फ़ाइल open करने में error आया।: {e}")
+        logger.error(f"❌ File open करने में error आया: {e}")
 
 async def create_folder(path):
     try:
         os.makedirs(path, exist_ok=True)
-        return f"✅ Folder create हो गया।: {path}"
+        return f"✅ Folder create हो गया: {path}"
     except Exception as e:
-        return f"❌ फ़ाइल create करने में error आया।: {e}"
+        return f"❌ Folder create करने में error आया: {e}"
 
 async def rename_item(old_path, new_path):
     try:
@@ -124,45 +139,68 @@ async def delete_item(path):
             os.remove(path)
         return f"🗑️ Deleted: {path}"
     except Exception as e:
-        return f"❌ Delete नहीं हुआ।: {e}"
+        return f"❌ Delete नहीं हुआ: {e}"
 
 # App control
 @function_tool
 async def open(app_title: str) -> str:
-    app_title = app_title.lower().strip()
-    app_command = APP_MAPPINGS.get(app_title, app_title)
+    """
+    Launch a specified application or open a system tool on Windows.
+    
+    Args:
+        app_title: Name of the application (e.g., 'notepad', 'chrome', 'edge', 'vs code', 'calculator').
+    """
+    app_title_clean = app_title.lower().strip()
+    app_command = APP_MAPPINGS.get(app_title_clean, app_title_clean)
     try:
         await asyncio.create_subprocess_shell(f'start "" "{app_command}"', shell=True)
-        focused = await focus_window(app_title)
+        focused = await focus_window(app_title_clean)
         if focused:
             return f"🚀 App launch हुआ और focus में है: {app_title}."
         else:
             return f"🚀 {app_title} Launch किया गया, लेकिन window पर focus नहीं हो पाया।"
     except Exception as e:
-        return f"❌ {app_title} Launch नहीं हो पाया।: {e}"
+        return f"❌ {app_title} Launch नहीं हो पाया: {e}"
 
 @function_tool
 async def close(window_title: str) -> str:
+    """
+    Close an active desktop window matching the provided title keyword.
+    
+    Args:
+        window_title: Keyword or name of the window to close.
+    """
     if not win32gui:
-        return "❌ win32gui"
+        return "❌ win32gui Library not available."
 
+    closed_count = 0
     def enumHandler(hwnd, _):
+        nonlocal closed_count
         if win32gui.IsWindowVisible(hwnd):
             if window_title.lower() in win32gui.GetWindowText(hwnd).lower():
                 win32gui.PostMessage(hwnd, win32con.WM_CLOSE, 0, 0)
+                closed_count += 1
 
     win32gui.EnumWindows(enumHandler, None)
-    return f"✅ Window बंद हो गई है।: {window_title}"
+    if closed_count > 0:
+        return f"✅ {closed_count} Window(s) बंद हो गई है: {window_title}"
+    return f"⚠ No matching active window found for: {window_title}"
 
 # Jarvis command logic
 @function_tool
 async def folder_file(command: str) -> str:
+    """
+    Manage files and folders (create folder, rename, delete, open folder/file).
+    
+    Args:
+        command: Command string such as 'create folder my_folder', 'open folder documents', etc.
+    """
     folders_to_index = ["D:/"]
     index = await index_items(folders_to_index)
     command_lower = command.lower()
 
     if "create folder" in command_lower:
-        folder_name = command.replace("create folder", "").strip()
+        folder_name = command.replace("create folder", "").replace("create Folder", "").strip()
         path = os.path.join("D:/", folder_name)
         return await create_folder(path)
 
@@ -188,7 +226,7 @@ async def folder_file(command: str) -> str:
         if item:
             await open_folder(item["path"])
             return f"✅ Folder opened: {item['name']}"
-        return "❌ Folder नहीं मिला।."
+        return "❌ Folder नहीं मिला।"
 
     item = await search_item(command, index, "file")
     if item:
