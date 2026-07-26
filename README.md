@@ -7,11 +7,19 @@ An intelligent, voice-enabled AI Assistant inspired by Iron Man's JARVIS. Built 
 ## 🌟 Key Features
 
 - 🎙️ **Real-Time Voice & Multimodal Interaction**: Powered by LiveKit Agents and Google's Realtime LLM models.
-- 🔍 **Google Search Integration**: Instant web searches via Google Custom Search API.
+- 🔍 **Google Search Integration**: Instant web searches via Google Custom Search API with structured result parsing.
 - 🌤️ **Weather Information**: Real-time weather data by city or auto-detected IP/saved address via OpenWeather API.
-- 🖥️ **Windows App & Window Control**: Launch, focus, and close desktop applications (Chrome, VS Code, Notepad, Calculator, Edge, etc.).
-- 📁 **File & Folder Management**: Search, open, create, rename, and delete files or directories with fuzzy search matching.
-- 🖱️ **Keyboard & Mouse Automation**: Control mouse cursor, perform clicks, scrolls, hotkeys, and volume adjustments.
+- 🖥️ **Windows App & Window Control**: Launch, focus, bring to foreground, and close desktop applications safely.
+- 📁 **File & Folder Management**: Fuzzy search file indexing, automatic window activation on file launch, and directory navigation.
+- 🖱️ **Safe Keyboard & Mouse Automation**: Token-protected controller for mouse movement, clicks, scrolling, hotkeys, and volume adjustments.
+
+---
+
+## 🛡️ Architecture & Security Guardrails
+
+- **Token-Gated Hardware Controller**: Mouse and keyboard control functions (`keyboard_mouse_CTRL.py`) feature a `SafeController` pattern that auto-activates only with secret tokens during tool execution.
+- **Robust Path & Directory Handling**: File indexing (`jarvis_file_opener.py`) gracefully handles non-existent paths and permission restrictions.
+- **Async Execution & Timeout Safety**: Weather and search operations enforce HTTP timeouts and fallback logic to guarantee real-time voice responsiveness.
 
 ---
 
@@ -73,3 +81,4 @@ python agent.py start
 
 Developed by **Bhisham Thakur** ([@Bhishamt](https://github.com/Bhishamt)).
 Released under the MIT License.
+
