@@ -4,7 +4,7 @@ An intelligent, voice-enabled AI Assistant inspired by Iron Man's JARVIS. Built 
 
 ---
 
-## 🌟 Key Features
+## 🌟 Key Features are
 
 - 🎙️ **Real-Time Voice & Multimodal Interaction**: Powered by LiveKit Agents and Google's Realtime LLM models.
 - 🔍 **Google Search Integration**: Instant web searches via Google Custom Search API with structured result parsing.
