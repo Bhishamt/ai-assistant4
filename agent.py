@@ -3,6 +3,8 @@ Jarvis AI Assistant Entry Point
 Voice-enabled multimodal AI agent using LiveKit and Google Realtime LLM models.
 """
 
+import logging
+import os
 from dotenv import load_dotenv
 
 from livekit import agents
@@ -28,6 +30,22 @@ from keyboard_mouse_CTRL import (
 )
 
 load_dotenv()
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("jarvis_agent")
+
+
+def validate_environment() -> None:
+    """Validates required environment variables for LiveKit and Google AI plugins."""
+    required_vars = ["LIVEKIT_URL", "LIVEKIT_API_KEY", "LIVEKIT_API_SECRET"]
+    missing = [var for var in required_vars if not os.getenv(var)]
+    if missing:
+        logger.warning(
+            f"⚠️ Missing environment variables: {', '.join(missing)}. "
+            "Ensure they are specified in .env for full LiveKit functionality."
+        )
+    else:
+        logger.info("✅ LiveKit environment configuration validated.")
 
 
 class Assistant(Agent):
@@ -58,27 +76,36 @@ class Assistant(Agent):
 
 async def entrypoint(ctx: agents.JobContext):
     """Main execution entrypoint for LiveKit Agent session."""
-    session = AgentSession(
-        llm=google.beta.realtime.RealtimeModel(
-            voice="Charon"
+    validate_environment()
+    logger.info("🚀 Starting JARVIS Agent session...")
+
+    try:
+        session = AgentSession(
+            llm=google.beta.realtime.RealtimeModel(
+                voice="Charon"
+            )
         )
-    )
 
-    await session.start(
-        room=ctx.room,
-        agent=Assistant(),
-        room_input_options=RoomInputOptions(
-            noise_cancellation=noise_cancellation.BVC(),
-            video_enabled=True,
-        ),
-    )
+        await session.start(
+            room=ctx.room,
+            agent=Assistant(),
+            room_input_options=RoomInputOptions(
+                noise_cancellation=noise_cancellation.BVC(),
+                video_enabled=True,
+            ),
+        )
 
-    await ctx.connect()
+        await ctx.connect()
 
-    await session.generate_reply(
-        instructions=Reply_prompts
-    )
+        await session.generate_reply(
+            instructions=Reply_prompts
+        )
+        logger.info("✅ JARVIS Session successfully initialized.")
+    except Exception as e:
+        logger.error(f"❌ Error during agent session initialization: {e}")
+        raise
 
 
 if __name__ == "__main__":
     agents.cli.run_app(agents.WorkerOptions(entrypoint_fnc=entrypoint))
+
