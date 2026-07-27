@@ -11,14 +11,15 @@ An intelligent, voice-enabled AI Assistant inspired by Iron Man's JARVIS. Built 
 - 🌤️ **Weather Information**: Real-time weather data by city or auto-detected IP/saved address via OpenWeather API.
 - 🖥️ **Windows App & Window Control**: Launch, focus, bring to foreground, and close desktop applications safely.
 - 📁 **File & Folder Management**: Fuzzy search file indexing, automatic window activation on file launch, and directory navigation.
-- 🖱️ **Safe Keyboard & Mouse Automation**: Token-protected controller for mouse movement, clicks, scrolling, hotkeys, and volume adjustments.
+- 🖱️ **Safe Keyboard & Mouse Automation**: Token-protected controller for mouse movement, clicks, scrolling, hotkeys, volume adjustments, and screen gestures.
 
 ---
 
 ## 🛡️ Architecture & Security Guardrails
 
-- **Token-Gated Hardware Controller**: Mouse and keyboard control functions (`keyboard_mouse_CTRL.py`) feature a `SafeController` pattern that auto-activates only with secret tokens during tool execution.
-- **Robust Path & Directory Handling**: File indexing (`jarvis_file_opener.py`) gracefully handles non-existent paths and permission restrictions.
+- **Token-Gated Hardware Controller**: Mouse and keyboard control functions (`keyboard_mouse_CTRL.py`) feature a `SafeController` pattern with automatic expiration (300s timeout) and strict boundary limits (1-2000px range clamping).
+- **Environment Validation**: System pre-flights check for required LiveKit API credentials (`LIVEKIT_URL`, `LIVEKIT_API_KEY`, `LIVEKIT_API_SECRET`) on session launch.
+- **Robust Path & Directory Handling**: File indexing (`jarvis_file_opener.py` & `jarvis_window_CTRL.py`) gracefully handles non-existent paths and permission restrictions.
 - **Async Execution & Timeout Safety**: Weather and search operations enforce HTTP timeouts and fallback logic to guarantee real-time voice responsiveness.
 
 ---
@@ -34,6 +35,8 @@ An intelligent, voice-enabled AI Assistant inspired by Iron Man's JARVIS. Built 
 ├── jarvis_file_opener.py   # Desktop file searching and media playback
 ├── keyboard_mouse_CTRL.py  # Automation for mouse movement, clicks, and keyboard shortcuts
 ├── addrees.json            # Location metadata configuration
+├── tests/
+│   └── test_agent_tools.py # Automated unit test suite
 └── requirements.txt        # Python dependencies
 ```
 
@@ -67,6 +70,22 @@ OPENWEATHER_API_KEY=your_openweather_api_key
 
 ---
 
+## 🧪 Running Unit Tests
+
+Run the test suite using Python's built-in `unittest` runner or `pytest`:
+
+```bash
+python -m unittest discover -s tests
+```
+
+or with `pytest`:
+
+```bash
+pytest tests/
+```
+
+---
+
 ## 🚀 Running the Assistant
 
 Run the agent worker using:
@@ -81,4 +100,5 @@ python agent.py start
 
 Developed by **Bhisham Thakur** ([@Bhishamt](https://github.com/Bhishamt)).
 Released under the MIT License.
+
 
