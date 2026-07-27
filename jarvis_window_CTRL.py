@@ -32,6 +32,7 @@ logger = logging.getLogger(__name__)
 # App command map with extended support for common Windows tools and browsers
 APP_MAPPINGS = {
     "notepad": "notepad",
+    "notepad++": "notepad++",
     "calculator": "calc",
     "chrome": "chrome",
     "edge": "msedge",
@@ -42,6 +43,8 @@ APP_MAPPINGS = {
     "powershell": "powershell",
     "cmd": "cmd",
     "command prompt": "cmd",
+    "terminal": "wt",
+    "windows terminal": "wt",
     "control panel": "control",
     "settings": "start ms-settings:",
     "paint": "mspaint",

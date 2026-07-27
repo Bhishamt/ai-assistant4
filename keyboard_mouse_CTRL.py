@@ -57,13 +57,19 @@ class SafeController:
         self.log("Controller auto-deactivated.")
 
     def is_active(self) -> bool:
-        """Checks if controller is currently active."""
+        """Checks if controller is currently active and within expiry timeout (300s)."""
+        if not self.active:
+            return False
+        if self.activation_time and (time.time() - self.activation_time > 300):
+            self.deactivate()
+            return False
         return self.active
 
     async def move_cursor(self, direction: str, distance: int = 100) -> str:
-        """Moves cursor in a specified direction by distance in pixels."""
+        """Moves cursor in a specified direction by distance in pixels (clamped 1-2000px)."""
         if not self.is_active():
             return "🛑 Controller is inactive."
+        distance = max(1, min(distance, 2000))
         x, y = self.mouse.position
         if direction == "left":
             self.mouse.position = (x - distance, y)
@@ -73,35 +79,45 @@ class SafeController:
             self.mouse.position = (x, y - distance)
         elif direction == "down":
             self.mouse.position = (x, y + distance)
+        else:
+            return f"❌ Invalid direction: {direction}"
         await asyncio.sleep(0.2)
-        self.log(f"Mouse moved {direction}")
-        return f"🖱️ Moved mouse {direction}."
+        self.log(f"Mouse moved {direction} by {distance}px")
+        return f"🖱️ Moved mouse {direction} by {distance}px."
 
     async def mouse_click(self, button: str = "left") -> str:
-        """Performs mouse click (left, right, or double)."""
+        """Performs mouse click (left, right, middle, or double)."""
         if not self.is_active():
             return "🛑 Controller is inactive."
-        if button == "left":
+        btn_clean = button.lower().strip()
+        if btn_clean == "left":
             self.mouse.click(Button.left, 1)
-        elif button == "right":
+        elif btn_clean == "right":
             self.mouse.click(Button.right, 1)
-        elif button == "double":
+        elif btn_clean == "middle":
+            self.mouse.click(Button.middle, 1)
+        elif btn_clean == "double":
             self.mouse.click(Button.left, 2)
+        else:
+            return f"❌ Invalid mouse button: {button}"
         await asyncio.sleep(0.2)
-        self.log(f"Mouse clicked: {button}")
-        return f"🖱️ {button.capitalize()} click."
+        self.log(f"Mouse clicked: {btn_clean}")
+        return f"🖱️ {btn_clean.capitalize()} click."
 
     async def scroll_cursor(self, direction: str, amount: int = 10) -> str:
         """Scrolls cursor up or down."""
         if not self.is_active():
             return "🛑 Controller is inactive."
+        amount = max(1, min(amount, 100))
         try:
             if direction == "up":
                 self.mouse.scroll(0, amount)
             elif direction == "down":
                 self.mouse.scroll(0, -amount)
+            else:
+                return f"❌ Invalid scroll direction: {direction}"
         except Exception:
-            pyautogui.scroll(amount * 100)
+            pyautogui.scroll(amount * 100 if direction == "up" else -amount * 100)
         await asyncio.sleep(0.2)
         self.log(f"Mouse scrolled {direction}")
         return f"🖱️ Scrolled {direction}"
@@ -110,6 +126,8 @@ class SafeController:
         """Types string text character by character."""
         if not self.is_active():
             return "🛑 Controller is inactive."
+        if not text:
+            return "❌ No text provided to type."
         for char in text:
             if not char.isprintable():
                 continue
@@ -142,6 +160,8 @@ class SafeController:
         """Presses and releases a key combination."""
         if not self.is_active():
             return "🛑 Controller is inactive."
+        if not keys:
+            return "❌ No hotkey combination provided."
         resolved = []
         for k in keys:
             if k.lower() not in self.special_keys and k.lower() not in self.valid_keys:
@@ -160,23 +180,26 @@ class SafeController:
         """Controls system audio volume (up, down, mute)."""
         if not self.is_active():
             return "🛑 Controller is inactive."
-        if action == "up":
+        act_clean = action.lower().strip()
+        if act_clean == "up":
             pyautogui.press("volumeup")
-        elif action == "down":
+        elif act_clean == "down":
             pyautogui.press("volumedown")
-        elif action == "mute":
+        elif act_clean == "mute":
             pyautogui.press("volumemute")
+        else:
+            return f"❌ Invalid volume action: {action}"
         await asyncio.sleep(0.2)
-        self.log(f"Volume control: {action}")
-        return f"🔊 Volume {action}."
+        self.log(f"Volume control: {act_clean}")
+        return f"🔊 Volume {act_clean}."
 
     async def swipe_gesture(self, direction: str) -> str:
         """Executes mouse drag swipe gesture in a direction."""
         if not self.is_active():
             return "🛑 Controller is inactive."
-        screen_width, screen_height = pyautogui.size()
-        x, y = screen_width // 2, screen_height // 2
         try:
+            screen_width, screen_height = pyautogui.size()
+            x, y = screen_width // 2, screen_height // 2
             if direction == "up":
                 pyautogui.moveTo(x, y + 200)
                 pyautogui.dragTo(x, y - 200, duration=0.5)
@@ -189,8 +212,11 @@ class SafeController:
             elif direction == "right":
                 pyautogui.moveTo(x - 200, y)
                 pyautogui.dragTo(x + 200, y, duration=0.5)
+            else:
+                return f"❌ Invalid swipe direction: {direction}"
         except Exception as e:
             self.log(f"Swipe gesture error: {e}")
+            return f"❌ Swipe gesture failed: {e}"
         await asyncio.sleep(0.5)
         self.log(f"Swipe gesture: {direction}")
         return f"🖱️ Swipe {direction} done."
