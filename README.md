@@ -100,5 +100,3 @@ python agent.py start
 
 Developed by **Bhisham Thakur** ([@Bhishamt](https://github.com/Bhishamt)).
 Released under the MIT License.
-
-
