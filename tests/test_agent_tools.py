@@ -76,5 +76,47 @@ class TestFuzzySearchAndMappings(unittest.TestCase):
         self.assertEqual(APP_MAPPINGS["terminal"], "wt")
 
 
+class TestWeatherAndSearchTools(unittest.TestCase):
+    """Test suite for weather and web search function tools."""
+
+    def test_get_current_datetime(self):
+        from jarvis_google_search import get_current_datetime
+        result = asyncio.run(get_current_datetime())
+        self.assertIsInstance(result, str)
+        self.assertIn("T", result)
+
+    def test_get_city_from_file(self):
+        from jarvis_get_weather import get_city_from_file
+        city = get_city_from_file()
+        self.assertIsInstance(city, str)
+
+    def test_google_search_missing_keys(self):
+        from jarvis_google_search import google_search
+        import os
+        orig_key = os.environ.get("GOOGLE_SEARCH_API_KEY")
+        if "GOOGLE_SEARCH_API_KEY" in os.environ:
+            del os.environ["GOOGLE_SEARCH_API_KEY"]
+        try:
+            result = asyncio.run(google_search("python"))
+            self.assertIn("missing", result.lower())
+        finally:
+            if orig_key:
+                os.environ["GOOGLE_SEARCH_API_KEY"] = orig_key
+
+    def test_get_weather_missing_key(self):
+        from jarvis_get_weather import get_weather
+        import os
+        orig_key = os.environ.get("OPENWEATHER_API_KEY")
+        if "OPENWEATHER_API_KEY" in os.environ:
+            del os.environ["OPENWEATHER_API_KEY"]
+        try:
+            result = asyncio.run(get_weather("London"))
+            self.assertTrue("openweather" in result.lower() or "missing" in result.lower())
+        finally:
+            if orig_key:
+                os.environ["OPENWEATHER_API_KEY"] = orig_key
+
+
 if __name__ == "__main__":
     unittest.main()
+
