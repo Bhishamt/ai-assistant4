@@ -1,5 +1,6 @@
 # jarvis_google_search.py
 import os
+import asyncio
 import requests
 import logging
 from dotenv import load_dotenv
@@ -40,7 +41,7 @@ async def google_search(query: str) -> str:
 
     try:
         logger.info("Google Custom Search API को request भेजी जा रही है...")
-        response = requests.get(url, params=params, timeout=10)
+        response = await asyncio.to_thread(requests.get, url, params=params, timeout=10)
 
         if response.status_code != 200:
             logger.error(f"Google API में error आया: {response.status_code} - {response.text}")

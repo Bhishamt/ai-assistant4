@@ -1,6 +1,7 @@
 # jarvis_get_weather.py
 import os
 import json
+import asyncio
 import requests
 import logging
 from dotenv import load_dotenv
@@ -78,7 +79,7 @@ async def get_weather(city: str = "", use_address_file: bool = False) -> str:
     }
 
     try:
-        response = requests.get(url, params=params, timeout=10)
+        response = await asyncio.to_thread(requests.get, url, params=params, timeout=10)
         if response.status_code != 200:
             logger.error(f"OpenWeather API error: {response.status_code} - {response.text}")
             return f"Error: {city} के लिए weather fetch नहीं कर पाए। कृपया city name चेक करें।"
