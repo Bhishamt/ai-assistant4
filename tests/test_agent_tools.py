@@ -123,6 +123,46 @@ class TestWeatherAndSearchTools(unittest.TestCase):
             if orig_key:
                 os.environ["OPENWEATHER_API_KEY"] = orig_key
 
+    def test_get_weather_timeout(self):
+        from jarvis_get_weather import get_weather
+        import os
+        from unittest.mock import patch
+        import requests
+        with patch("requests.get", side_effect=requests.exceptions.Timeout("Connection timed out")):
+            orig_key = os.environ.get("OPENWEATHER_API_KEY")
+            os.environ["OPENWEATHER_API_KEY"] = "fake_key"
+            try:
+                result = asyncio.run(get_weather("London"))
+                self.assertIn("timed out", result.lower())
+            finally:
+                if orig_key:
+                    os.environ["OPENWEATHER_API_KEY"] = orig_key
+                else:
+                    os.environ.pop("OPENWEATHER_API_KEY", None)
+
+    def test_google_search_timeout(self):
+        from jarvis_google_search import google_search
+        import os
+        from unittest.mock import patch
+        import requests
+        with patch("requests.get", side_effect=requests.exceptions.Timeout("Connection timed out")):
+            orig_key = os.environ.get("GOOGLE_SEARCH_API_KEY")
+            orig_cx = os.environ.get("SEARCH_ENGINE_ID")
+            os.environ["GOOGLE_SEARCH_API_KEY"] = "fake_key"
+            os.environ["SEARCH_ENGINE_ID"] = "fake_cx"
+            try:
+                result = asyncio.run(google_search("python"))
+                self.assertIn("timed out", result.lower())
+            finally:
+                if orig_key:
+                    os.environ["GOOGLE_SEARCH_API_KEY"] = orig_key
+                else:
+                    os.environ.pop("GOOGLE_SEARCH_API_KEY", None)
+                if orig_cx:
+                    os.environ["SEARCH_ENGINE_ID"] = orig_cx
+                else:
+                    os.environ.pop("SEARCH_ENGINE_ID", None)
+
 
 
 class TestAgentEnvironment(unittest.TestCase):

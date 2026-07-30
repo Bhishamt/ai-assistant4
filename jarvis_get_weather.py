@@ -100,6 +100,12 @@ async def get_weather(city: str = "", use_address_file: bool = False) -> str:
         logger.info(f"Weather result:\n{result}")
         return result
 
+    except requests.exceptions.Timeout:
+        logger.error(f"Weather API timeout for city: {city}")
+        return f"Error: Weather service timed out while fetching data for {city}."
+    except requests.exceptions.RequestException as e:
+        logger.error(f"Network error fetching weather for {city}: {e}")
+        return f"Error: Network error occurred while fetching weather for {city}."
     except Exception as e:
         logger.exception(f"Weather fetch करते समय exception आया: {e}")
         return "Weather fetch करते समय एक error आया"

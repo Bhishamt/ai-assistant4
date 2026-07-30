@@ -64,6 +64,12 @@ async def google_search(query: str) -> str:
             logger.info(f"{i}. {title}\n{link}\n{snippet}\n")
 
         return formatted.strip()
+    except requests.exceptions.Timeout:
+        logger.error("Google search request timed out.")
+        return "Search request timed out. Please try again."
+    except requests.exceptions.RequestException as e:
+        logger.error(f"Network error during Google search: {e}")
+        return f"Network error during search execution: {e}"
     except Exception as e:
         logger.exception(f"Google search request failed: {e}")
         return f"Search execution failed: {e}"
