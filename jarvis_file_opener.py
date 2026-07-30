@@ -49,23 +49,48 @@ async def focus_window(title_keyword: str) -> bool:
     return False
 
 
-async def index_files(base_dirs: List[str]) -> List[Dict[str, str]]:
-    """Indexes files recursively from specified base directories.
+EXCLUDED_DIRS = {
+    "$RECYCLE.BIN",
+    "System Volume Information",
+    ".git",
+    "node_modules",
+    "__pycache__",
+    ".pytest_cache",
+    "venv",
+    ".venv",
+}
+
+
+async def index_files(base_dirs: List[str], max_depth: int = 5) -> List[Dict[str, str]]:
+    """Indexes files recursively from specified base directories up to a max depth.
 
     Args:
         base_dirs (List[str]): List of directory paths to index.
+        max_depth (int): Maximum directory recursion depth (default 5).
 
     Returns:
         List[Dict[str, str]]: A list of dictionaries containing file metadata.
     """
     file_index = []
     for base_dir in base_dirs:
-        if not os.path.exists(base_dir):
+        base_path = os.path.abspath(base_dir)
+        if not os.path.exists(base_path):
             logger.warning(f"⚠️ Directory does not exist, skipping: {base_dir}")
             continue
         try:
-            for root, _, files in os.walk(base_dir):
+            base_depth = base_path.rstrip(os.sep).count(os.sep)
+            for root, dirs, files in os.walk(base_path, topdown=True):
+                # Prune excluded system/cache and hidden directories in-place
+                dirs[:] = [d for d in dirs if d not in EXCLUDED_DIRS and not d.startswith('.')]
+                
+                current_depth = root.rstrip(os.sep).count(os.sep) - base_depth
+                if current_depth >= max_depth:
+                    dirs.clear()
+                    continue
+
                 for f in files:
+                    if f.startswith('.'):
+                        continue
                     file_index.append({
                         "name": f,
                         "path": os.path.join(root, f),

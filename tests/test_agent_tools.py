@@ -82,6 +82,26 @@ class TestFuzzySearchAndMappings(unittest.TestCase):
         self.assertIn("terminal", APP_MAPPINGS)
         self.assertEqual(APP_MAPPINGS["terminal"], "wt")
 
+    def test_index_files_excluded_dirs_and_depth(self):
+        from jarvis_file_opener import index_files
+        import tempfile
+        import os
+        with tempfile.TemporaryDirectory() as tmpdir:
+            normal_dir = os.path.join(tmpdir, "documents")
+            excluded_dir = os.path.join(tmpdir, ".git")
+            os.makedirs(normal_dir)
+            os.makedirs(excluded_dir)
+
+            with open(os.path.join(normal_dir, "doc.txt"), "w") as f:
+                f.write("test")
+            with open(os.path.join(excluded_dir, "config"), "w") as f:
+                f.write("git config")
+
+            indexed = asyncio.run(index_files([tmpdir], max_depth=3))
+            filenames = [item["name"] for item in indexed]
+            self.assertIn("doc.txt", filenames)
+            self.assertNotIn("config", filenames)
+
 
 class TestWeatherAndSearchTools(unittest.TestCase):
     """Test suite for weather and web search function tools."""

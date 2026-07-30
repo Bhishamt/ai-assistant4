@@ -15,6 +15,8 @@ An intelligent, voice-enabled AI Assistant inspired by Iron Man's JARVIS. Built 
 
 ---
 
+## 🛡️ Architecture & Security Guardrails
+
 - **Token-Gated Hardware Controller**: Mouse and keyboard control functions (`keyboard_mouse_CTRL.py`) feature a `SafeController` pattern with automatic expiration (300s timeout) and strict boundary limits (1-2000px range clamping).
 - **Environment Validation**: System pre-flights validate required LiveKit API credentials (`LIVEKIT_URL`, `LIVEKIT_API_KEY`, `LIVEKIT_API_SECRET`) on session launch and return status indicators.
 - **Robust Path & Directory Handling**: File indexing (`jarvis_file_opener.py` & `jarvis_window_CTRL.py`) gracefully handles non-existent paths and permission restrictions.
