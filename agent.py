@@ -35,8 +35,13 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("jarvis_agent")
 
 
-def validate_environment() -> None:
-    """Validates required environment variables for LiveKit and Google AI plugins."""
+def validate_environment() -> bool:
+    """
+    Validates required environment variables for LiveKit and Google AI plugins.
+    
+    Returns:
+        bool: True if all required environment variables are set, False otherwise.
+    """
     required_vars = ["LIVEKIT_URL", "LIVEKIT_API_KEY", "LIVEKIT_API_SECRET"]
     missing = [var for var in required_vars if not os.getenv(var)]
     if missing:
@@ -44,8 +49,10 @@ def validate_environment() -> None:
             f"⚠️ Missing environment variables: {', '.join(missing)}. "
             "Ensure they are specified in .env for full LiveKit functionality."
         )
-    else:
-        logger.info("✅ LiveKit environment configuration validated.")
+        return False
+    
+    logger.info("✅ LiveKit environment configuration validated.")
+    return True
 
 
 class Assistant(Agent):
@@ -76,7 +83,10 @@ class Assistant(Agent):
 
 async def entrypoint(ctx: agents.JobContext):
     """Main execution entrypoint for LiveKit Agent session."""
-    validate_environment()
+    is_valid = validate_environment()
+    if not is_valid:
+        logger.warning("Agent session initializing with missing environment configuration.")
+
     logger.info("🚀 Starting JARVIS Agent session...")
 
     try:
@@ -102,7 +112,7 @@ async def entrypoint(ctx: agents.JobContext):
         )
         logger.info("✅ JARVIS Session successfully initialized.")
     except Exception as e:
-        logger.error(f"❌ Error during agent session initialization: {e}")
+        logger.error(f"❌ Error during agent session initialization: {e}", exc_info=True)
         raise
 
 
