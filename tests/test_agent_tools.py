@@ -4,6 +4,13 @@ Unit Test Suite for JARVIS AI Assistant Core Tools and Safe Controller.
 
 import unittest
 import asyncio
+import sys
+from pathlib import Path
+
+root_dir = Path(__file__).resolve().parent.parent
+if str(root_dir) not in sys.path:
+    sys.path.insert(0, str(root_dir))
+
 from keyboard_mouse_CTRL import SafeController
 from jarvis_file_opener import search_file
 from jarvis_window_CTRL import search_item, APP_MAPPINGS
@@ -115,6 +122,41 @@ class TestWeatherAndSearchTools(unittest.TestCase):
         finally:
             if orig_key:
                 os.environ["OPENWEATHER_API_KEY"] = orig_key
+
+
+
+class TestAgentEnvironment(unittest.TestCase):
+    """Test suite for agent environment configuration validation."""
+
+    def test_validate_environment_with_vars(self):
+        from agent import validate_environment
+        import os
+        orig_vars = {v: os.environ.get(v) for v in ["LIVEKIT_URL", "LIVEKIT_API_KEY", "LIVEKIT_API_SECRET"]}
+        try:
+            os.environ["LIVEKIT_URL"] = "wss://test.livekit.cloud"
+            os.environ["LIVEKIT_API_KEY"] = "test_key"
+            os.environ["LIVEKIT_API_SECRET"] = "test_secret"
+            self.assertTrue(validate_environment())
+        finally:
+            for k, v in orig_vars.items():
+                if v is None:
+                    os.environ.pop(k, None)
+                else:
+                    os.environ[k] = v
+
+    def test_validate_environment_missing_vars(self):
+        from agent import validate_environment
+        import os
+        orig_vars = {v: os.environ.get(v) for v in ["LIVEKIT_URL", "LIVEKIT_API_KEY", "LIVEKIT_API_SECRET"]}
+        try:
+            os.environ.pop("LIVEKIT_URL", None)
+            self.assertFalse(validate_environment())
+        finally:
+            for k, v in orig_vars.items():
+                if v is None:
+                    os.environ.pop(k, None)
+                else:
+                    os.environ[k] = v
 
 
 if __name__ == "__main__":
