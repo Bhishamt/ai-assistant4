@@ -80,7 +80,17 @@ class TestFuzzySearchAndMappings(unittest.TestCase):
         self.assertIn("notepad", APP_MAPPINGS)
         self.assertIn("chrome", APP_MAPPINGS)
         self.assertIn("terminal", APP_MAPPINGS)
+        self.assertIn("git bash", APP_MAPPINGS)
+        self.assertIn("slack", APP_MAPPINGS)
         self.assertEqual(APP_MAPPINGS["terminal"], "wt")
+        self.assertEqual(APP_MAPPINGS["git bash"], "git-bash")
+
+    def test_open_and_close_empty_title_validation(self):
+        from jarvis_window_CTRL import open as open_app, close as close_app
+        res_open = asyncio.run(open_app("   "))
+        self.assertIn("cannot be empty", res_open)
+        res_close = asyncio.run(close_app(""))
+        self.assertIn("cannot be empty", res_close)
 
     def test_index_files_excluded_dirs_and_depth(self):
         from jarvis_file_opener import index_files

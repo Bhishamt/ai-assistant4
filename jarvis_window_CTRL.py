@@ -53,7 +53,12 @@ APP_MAPPINGS = {
     "excel": "excel",
     "spotify": "spotify",
     "vs code": "code",
-    "vscode": "code"
+    "vscode": "code",
+    "git bash": "git-bash",
+    "brave": "brave",
+    "slack": "slack",
+    "discord": "discord",
+    "sublime": "sublime_text"
 }
 
 # -------------------------
@@ -153,6 +158,9 @@ async def open(app_title: str) -> str:
     Args:
         app_title: Name of the application (e.g., 'notepad', 'chrome', 'edge', 'vs code', 'calculator').
     """
+    if not app_title or not app_title.strip():
+        return "❌ App title cannot be empty."
+
     app_title_clean = app_title.lower().strip()
     app_command = APP_MAPPINGS.get(app_title_clean, app_title_clean)
     try:
@@ -173,6 +181,9 @@ async def close(window_title: str) -> str:
     Args:
         window_title: Keyword or name of the window to close.
     """
+    if not window_title or not window_title.strip():
+        return "❌ Window title cannot be empty."
+
     if not win32gui:
         return "❌ win32gui Library not available."
 
