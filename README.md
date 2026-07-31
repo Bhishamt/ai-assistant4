@@ -9,7 +9,7 @@ An intelligent, voice-enabled AI Assistant inspired by Iron Man's JARVIS. Built 
 - 🎙️ **Real-Time Voice & Multimodal Interaction**: Powered by LiveKit Agents and Google's Realtime LLM models.
 - 🔍 **Google Search Integration**: Instant web searches via Google Custom Search API with structured result parsing.
 - 🌤️ **Weather Information**: Real-time weather data by city or auto-detected IP/saved address via OpenWeather API.
-- 🖥️ **Windows App & Window Control**: Launch, focus, bring to foreground, and close desktop applications safely.
+- 🖥️ **Windows App & Window Control**: Launch, focus, bring to foreground, and close desktop applications safely with extended app aliases (Notepad, Chrome, Edge, VS Code, Git Bash, Slack, Discord, Brave, Sublime Text).
 - 📁 **File & Folder Management**: Fuzzy search file indexing, automatic window activation on file launch, and directory navigation.
 - 🖱️ **Safe Keyboard & Mouse Automation**: Token-protected controller for mouse movement, clicks, scrolling, hotkeys, volume adjustments, and screen gestures.
 
@@ -18,7 +18,7 @@ An intelligent, voice-enabled AI Assistant inspired by Iron Man's JARVIS. Built 
 ## 🛡️ Architecture & Security Guardrails
 
 - **Token-Gated Hardware Controller**: Mouse and keyboard control functions (`keyboard_mouse_CTRL.py`) feature a `SafeController` pattern with automatic expiration (300s timeout) and strict boundary limits (1-2000px range clamping).
-- **Environment Validation**: System pre-flights validate required LiveKit API credentials (`LIVEKIT_URL`, `LIVEKIT_API_KEY`, `LIVEKIT_API_SECRET`) on session launch and return status indicators.
+- **Environment & Input Validation**: System pre-flights validate required LiveKit API credentials on session launch; window control operations validate empty title inputs.
 - **Robust Path & Directory Handling**: File indexing (`jarvis_file_opener.py` & `jarvis_window_CTRL.py`) gracefully handles non-existent paths and permission restrictions.
 - **Async Execution & Timeout Safety**: Weather and search operations enforce off-thread execution, specific `Timeout` and `RequestException` handling, and fallback logic to guarantee real-time voice responsiveness.
 
